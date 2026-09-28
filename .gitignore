@@ -1,0 +1,20 @@
+.DS_Store
+node_modules/
+
+# Generated video and frame exports
+exports/
+renders/
+frames/
+**/frames/
+*.mov
+*.mp4
+*.webm
+
+# Private or one-off project data
+presets/private/
+*.local.json
+
+# Editor and OS files
+.idea/
+.vscode/
+Thumbs.db

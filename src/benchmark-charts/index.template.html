@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Benchmark Studio</title>
+  <style>
+    @font-face{font-family:"GC Sans";src:url("{{FONT}}") format("truetype");font-weight:300 800;font-display:swap}
+    :root{color-scheme:dark;--ui-bg:#09090b;--ui-panel:#111115;--ui-card:#19191f;--ui-line:#303038;--ui-text:#f8fafc;--ui-muted:#919bab;--ui-brand:#df3438}
+    *{box-sizing:border-box}html,body{width:100%;height:100%}body{margin:0;overflow:hidden;background:var(--ui-bg);color:var(--ui-text);font-family:"GC Sans","Avenir Next",sans-serif;-webkit-font-smoothing:antialiased}button,input,select,textarea{font:inherit}button{color:inherit}.app{height:100vh;display:grid;grid-template-columns:410px minmax(0,1fr)}
+    .controls{min-height:0;overflow:auto;padding:22px;border-right:1px solid var(--ui-line);background:var(--ui-panel);scrollbar-width:thin;scrollbar-color:#3a3a42 transparent}.brand{width:192px;display:block;margin-bottom:19px}.tool-kicker{color:#ff5458;font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}.tool-title{margin:7px 0 6px;font-size:29px;letter-spacing:-.045em}.tool-copy{margin:0 0 18px;color:var(--ui-muted);font-size:12px;line-height:1.45}
+    details{border-top:1px solid rgba(255,255,255,.08)}summary{padding:16px 1px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:#dbe1ea;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;list-style:none}summary::-webkit-details-marker{display:none}summary::after{content:"+";color:#6f7887;font-size:16px}details[open] summary::after{content:"−"}.section-body{padding:0 0 18px}.field{display:grid;gap:6px;margin-top:11px}.field:first-child{margin-top:0}.field label,.range-head{color:var(--ui-muted);font-size:11px}.range-head{display:flex;justify-content:space-between;gap:8px}.range-head output{color:#dbe1ea;font-variant-numeric:tabular-nums}input[type="text"],input[type="number"],select,textarea{width:100%;border:1px solid var(--ui-line);border-radius:9px;outline:none;background:var(--ui-card);color:var(--ui-text)}input[type="text"],input[type="number"],select{height:38px;padding:0 10px}textarea{min-height:116px;padding:10px;resize:vertical;font:10px/1.4 ui-monospace,monospace}input:focus,select:focus,textarea:focus{border-color:var(--ui-brand);box-shadow:0 0 0 3px rgba(223,52,56,.13)}input[type="range"]{width:100%;accent-color:var(--ui-brand)}input[type="color"]{width:44px;height:34px;padding:2px;border:1px solid var(--ui-line);border-radius:8px;background:var(--ui-card)}.two{display:grid;grid-template-columns:1fr 1fr;gap:9px}.three{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.check{min-height:32px;display:flex;align-items:center;gap:8px;color:#cfd5df;font-size:12px}.check input{accent-color:var(--ui-brand)}.color-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;margin-top:8px;color:var(--ui-muted);font-size:11px}
+    .btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.btn{min-height:40px;border:1px solid var(--ui-line);border-radius:9px;background:var(--ui-card);cursor:pointer}.btn:hover{border-color:#51515d;background:#212128}.btn.primary{border-color:var(--ui-brand);background:var(--ui-brand);font-weight:750}.btn.wide{grid-column:1/-1}.file-label{display:grid;place-items:center;min-height:40px;border:1px solid var(--ui-line);border-radius:9px;background:var(--ui-card);font-size:12px;cursor:pointer}.file-label input{display:none}.data-editor{margin-top:12px;display:grid;gap:7px}.data-row{display:grid;grid-template-columns:18px minmax(0,1fr) 82px 27px;gap:6px;align-items:center}.drag{color:#626b79;font-size:15px;text-align:center;cursor:grab}.data-row input{height:34px}.remove{height:28px;border:0;border-radius:6px;background:#27272e;color:#8992a0;cursor:pointer}.help{margin:9px 0 0;color:#6f7888;font-size:10px;line-height:1.45}.sticky-actions{position:sticky;bottom:-22px;margin:0 -22px -22px;padding:14px 22px 20px;border-top:1px solid var(--ui-line);background:linear-gradient(180deg,rgba(17,17,21,.94),#111115 28%);z-index:5}.status{margin-top:9px;color:#778191;font-size:10px;text-align:center}
+    .workspace{min-width:0;min-height:0;display:grid;grid-template-rows:58px 1fr}.topbar{padding:0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--ui-line);background:#0d0d10}.readout{display:flex;align-items:center;gap:9px}.readout strong{font-size:13px}.chip{padding:5px 8px;border-radius:6px;background:#19191f;color:#8992a0;font-size:10px}.timecode{font-size:12px;color:#b6becb;font-variant-numeric:tabular-nums}.preview-wrap{min-height:0;padding:22px;display:grid;place-items:center;overflow:hidden;background:radial-gradient(65rem 35rem at 72% -20%,rgba(223,52,56,.1),transparent 65%)}.viewport{position:relative;width:100%;max-width:1500px;aspect-ratio:16/9;overflow:hidden;background:#050506;box-shadow:0 24px 90px rgba(0,0,0,.6),0 0 0 1px var(--ui-line)}
+    .stage{--bg:#0d0d10;--fg:#fff;--muted:#9aa4b5;--accent:#df3438;--winner:#74dda1;--track:#24242b;--title-size:154px;--label-size:55px;--value-size:72px;--font:"GC Sans";--safe:220px;position:absolute;left:0;top:0;width:3840px;height:2160px;overflow:hidden;transform-origin:top left;background:radial-gradient(1800px 1100px at 82% 4%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 62%),var(--bg);color:var(--fg);font-family:var(--font),sans-serif}.stage::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.14;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.12'/%3E%3C/svg%3E");mix-blend-mode:soft-light}.stage.transparent{background:transparent}.stage.transparent::after,.stage.green::after{display:none}.stage.green{background:#00ff00}.stage.light::after{opacity:.06}.capture-brand{position:absolute;left:var(--safe);top:150px;width:420px;height:auto;z-index:4}.stage.hide-brand .capture-brand{display:none}.head{position:absolute;left:var(--safe);right:var(--safe);top:300px;z-index:3}.kicker{color:var(--accent);font-size:29px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}.head h1{margin:28px 0 0;max-width:2940px;font-size:var(--title-size);font-weight:760;line-height:.93;letter-spacing:-.055em;text-transform:var(--title-transform,none)}.subtitle{margin:28px 0 0;color:var(--muted);font-size:39px;line-height:1.3}.chart{position:absolute;left:var(--safe);right:var(--safe);top:850px;bottom:240px;z-index:3}.bar-layout{display:grid;align-content:center;gap:26px}.chart-row{--delay:0ms;min-height:174px;display:grid;grid-template-columns:640px 1fr 390px;align-items:center;gap:40px;opacity:1}.rank{width:62px;color:var(--muted);font-size:30px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}.identity{min-width:0;display:grid;grid-template-columns:auto 116px 1fr;align-items:center;gap:28px}.stage.hide-rank .rank{display:none}.stage.hide-rank .identity{grid-template-columns:116px 1fr}.logo{width:116px;height:116px;padding:7px;border-radius:25px;object-fit:contain;background:rgba(255,255,255,.055)}.stage.hide-logo .logo{display:none}.stage.hide-logo .identity{grid-template-columns:auto 1fr}.stage.hide-rank.hide-logo .identity{grid-template-columns:1fr}.name{min-width:0;font-size:var(--label-size);font-weight:650;line-height:1.02}.mark-wrap{position:relative;height:76px}.bar-track{position:absolute;inset:0;border-radius:18px;background:var(--track);overflow:hidden}.bar-fill{height:100%;width:var(--target);border-radius:inherit;background:linear-gradient(90deg,color-mix(in srgb,var(--accent) 76%,#000),var(--accent));transform-origin:left}.chart-row.winner .bar-fill{background:linear-gradient(90deg,color-mix(in srgb,var(--winner) 72%,#000),var(--winner))}.baseline-marker{position:absolute;top:-14px;bottom:-14px;width:4px;border-radius:4px;background:color-mix(in srgb,var(--fg) 42%,transparent);display:none}.stage.show-baseline .baseline-marker{display:block}.value{text-align:right;font-size:var(--value-size);font-weight:760;letter-spacing:-.045em;font-variant-numeric:tabular-nums}.value small{display:block;margin-top:7px;color:var(--muted);font-size:25px;font-weight:600;letter-spacing:.05em;text-transform:uppercase}.footnote{position:absolute;left:var(--safe);right:var(--safe);bottom:130px;color:var(--muted);font-size:25px;z-index:3}
+    .lollipop-layout{display:grid;align-content:center;gap:24px}.lollipop-layout .chart-row{grid-template-columns:640px 1fr 390px}.lollipop-layout .mark-wrap{height:66px}.lollipop-layout .bar-track{height:8px;top:29px;overflow:visible}.lollipop-layout .bar-fill{height:8px;position:relative}.lollipop-layout .bar-fill::after{content:"";position:absolute;right:-25px;top:-21px;width:50px;height:50px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 12px color-mix(in srgb,var(--accent) 15%,transparent)}.lollipop-layout .winner .bar-fill::after{background:var(--winner);box-shadow:0 0 0 12px color-mix(in srgb,var(--winner) 15%,transparent)}
+    .card-layout{display:grid;grid-template-columns:repeat(var(--columns,4),1fr);gap:34px;align-content:center}.result-card{--delay:0ms;min-height:560px;padding:55px;display:grid;grid-template-rows:auto 1fr auto;gap:34px;border:3px solid color-mix(in srgb,var(--fg) 12%,transparent);border-radius:40px;background:color-mix(in srgb,var(--bg) 70%,#26262d);box-shadow:0 35px 90px rgba(0,0,0,.24)}.result-card.winner{border-color:color-mix(in srgb,var(--winner) 62%,transparent);box-shadow:0 35px 90px rgba(0,0,0,.24),0 0 60px color-mix(in srgb,var(--winner) 12%,transparent)}.card-top{display:flex;justify-content:space-between;align-items:flex-start}.card-rank{color:var(--muted);font-size:30px;font-weight:700}.card-logo{width:130px;height:130px;object-fit:contain}.card-name{align-self:end;font-size:var(--label-size);font-weight:680;line-height:1.02}.card-value{font-size:var(--value-size);font-weight:780;letter-spacing:-.045em}.card-value small{display:block;margin-top:10px;color:var(--muted);font-size:24px;letter-spacing:.05em;text-transform:uppercase}
+    .stage.playing.anim-grow .chart-row,.stage.playing.anim-wipe .chart-row{animation:rowReveal 480ms calc(120ms + var(--delay)) both cubic-bezier(.16,1,.3,1)}.stage.playing.anim-grow .bar-fill{animation:growBar var(--duration) calc(260ms + var(--delay)) both var(--ease)}.stage.playing.anim-wipe .bar-fill{animation:wipeBar var(--duration) calc(260ms + var(--delay)) both var(--ease)}.stage.playing.anim-slide .chart-row,.stage.playing.anim-slide .result-card{animation:slideIn var(--duration) calc(100ms + var(--delay)) both var(--ease)}.stage.playing.anim-pop .chart-row,.stage.playing.anim-pop .result-card{animation:popIn var(--duration) calc(100ms + var(--delay)) both var(--ease)}.stage.playing.anim-slide .bar-fill,.stage.playing.anim-pop .bar-fill{animation:growBar var(--duration) calc(250ms + var(--delay)) both var(--ease)}.stage.anim-none .chart-row,.stage.anim-none .result-card{opacity:1}.stage.anim-none .bar-fill{width:var(--target)}.stage:not(.playing):not(.anim-none) .chart-row,.stage:not(.playing):not(.anim-none) .result-card{opacity:0}.stage:not(.playing):not(.anim-none) .bar-fill{width:0}.stage.playing .result-card{animation:popIn var(--duration) calc(100ms + var(--delay)) both var(--ease)}
+    @keyframes rowReveal{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}@keyframes growBar{from{width:0}to{width:var(--target)}}@keyframes wipeBar{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}@keyframes slideIn{from{opacity:0;transform:translateX(-150px)}to{opacity:1;transform:none}}@keyframes popIn{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:none}}
+    .capture-mode .app{display:block}.capture-mode .controls,.capture-mode .topbar{display:none}.capture-mode .workspace,.capture-mode .preview-wrap{width:100vw;height:100vh;padding:0;display:block}.capture-mode .viewport{width:100vw;height:100vh;max-width:none;box-shadow:none}.capture-exit{position:fixed;right:18px;top:18px;z-index:99;padding:9px 12px;border:1px solid rgba(255,255,255,.18);border-radius:8px;background:rgba(0,0,0,.55);color:rgba(255,255,255,.68);opacity:0;pointer-events:none}.capture-mode .capture-exit{opacity:1;pointer-events:auto}.capture-mode:not(:hover) .capture-exit{opacity:0}
+    @media(max-width:1100px){.app{grid-template-columns:340px minmax(0,1fr)}.controls{padding:17px}.preview-wrap{padding:14px}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:1ms!important;animation-delay:0ms!important;transition-duration:1ms!important}}
+    /* Control-panel consistency pass */
+    .controls{font-size:12px}
+    .section-body{display:grid;gap:0}
+    .field{min-width:0;margin-top:12px;gap:7px}
+    .field:first-child{margin-top:0}
+    .field>label,.range-head{min-height:16px;display:flex;align-items:flex-end;color:var(--ui-muted);font-size:11px;font-weight:500;line-height:1.3}
+    .two,.three{align-items:start;gap:10px}
+    .two>.field,.three>.field{min-width:0;margin-top:12px;grid-template-rows:minmax(30px,auto) 40px}
+    .two>.field>label,.three>.field>label{min-height:30px;align-items:flex-end}
+    input[type="text"],input[type="number"],select{height:40px;min-width:0;padding:0 11px;font-size:12px;line-height:1.2}
+    select{padding-right:30px;text-overflow:ellipsis}
+    textarea{font-size:11px}
+    textarea.copy-field{min-height:58px;height:auto;padding:10px 11px;overflow:hidden;resize:none;font-family:inherit;font-size:12px;line-height:1.4;white-space:pre-wrap}
+    .two>*,.three>*{min-width:0}
+    .two>.check,.three>.check{min-height:40px;margin-top:12px;align-items:center}
+    .section-body>.check{min-height:40px;margin-top:12px;align-items:center}
+    .check{min-width:0;font-size:11px;line-height:1.25}
+    .color-row{min-height:40px;margin-top:10px;font-size:11px}
+    .btns{align-items:stretch;gap:10px;margin-top:10px}
+    .btn,.file-label{min-height:40px;font-size:12px;line-height:1.2}
+    .data-row{grid-template-columns:18px minmax(0,1fr) 94px 30px;gap:7px}
+    .data-row input{font-size:12px}
+    summary:focus{outline:none}
+    summary:focus-visible{outline:2px solid var(--ui-brand);outline-offset:3px;border-radius:6px}
+    .stage.hide-brand .capture-brand{display:block!important}
+    .head h1{text-transform:none!important}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="controls">
+      <img class="brand" src="{{BRAND}}" alt="Gaming Careers">
+      <div class="tool-kicker">Professional graphics package</div>
+      <h1 class="tool-title">Benchmark Studio</h1>
+      <p class="tool-copy">Turn raw benchmark results into repeatable, broadcast-ready 4K graphics.</p>
+
+      <details open>
+        <summary>Data & metric</summary>
+        <div class="section-body">
+          <div class="field"><label for="metric">Metric</label><select id="metric"></select></div>
+          <div class="two">
+            <div class="field"><label for="direction">Better result</label><select id="direction"><option value="high">Higher</option><option value="low">Lower</option></select></div>
+            <div class="field"><label for="sort">Order</label><select id="sort"><option value="best">Best first</option><option value="worst">Worst first</option><option value="manual">Manual</option></select></div>
+          </div>
+          <div class="three">
+            <div class="field"><label for="unit">Unit</label><input id="unit" type="text"></div>
+            <div class="field"><label for="precision">Decimals</label><input id="precision" type="number" min="0" max="3" value="1"></div>
+            <div class="field"><label for="rowLimit">Max rows</label><input id="rowLimit" type="number" min="2" max="10" value="6"></div>
+          </div>
+          <div class="field"><label for="baseline">Baseline value</label><input id="baseline" type="number" step="any"></div>
+          <div class="data-editor" id="dataEditor"></div>
+          <div class="btns"><button class="btn" id="addRow">Add result</button><label class="file-label">Import JSON<input id="jsonFile" type="file" accept="application/json,.json"></label></div>
+          <div class="field"><label for="rawJson">Raw benchmark JSON</label><textarea id="rawJson" spellcheck="false"></textarea></div>
+          <div class="btns"><button class="btn wide" id="applyJson">Apply JSON</button></div>
+          <p class="help">Understands the supplied benchmark report format. The row editor changes the currently selected metric.</p>
+        </div>
+      </details>
+
+      <details open>
+        <summary>Content & chart</summary>
+        <div class="section-body">
+          <div class="field"><label for="title">Title</label><textarea class="copy-field" id="title" rows="2"></textarea></div>
+          <div class="field"><label for="subtitle">Subtitle</label><textarea class="copy-field" id="subtitle" rows="2"></textarea></div>
+          <div class="field"><label for="kicker">Kicker</label><input id="kicker" type="text"></div>
+          <div class="field"><label for="footnote">Source / footnote</label><textarea class="copy-field" id="footnote" rows="2"></textarea></div>
+          <div class="two">
+            <div class="field"><label for="chartType">Chart style</label><select id="chartType"><option value="bar">Ranked bars</option><option value="lollipop">Lollipop</option><option value="cards">Result cards</option></select></div>
+            <div class="field"><label for="scaleMode">Scale</label><select id="scaleMode"><option value="data">Fit data</option><option value="zero">Start at zero</option><option value="manual">Manual maximum</option></select></div>
+          </div>
+          <div class="field"><label for="manualMax">Manual maximum</label><input id="manualMax" type="number" step="any" value="100"></div>
+          <div class="two"><label class="check"><input id="showRank" type="checkbox" checked> Show ranks</label><label class="check"><input id="showLogo" type="checkbox" checked> Show logos</label></div>
+          <div class="two"><label class="check"><input id="showBaseline" type="checkbox"> Baseline marker</label><label class="check"><input id="highlightWinner" type="checkbox" checked> Highlight winner</label></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Typography & spacing</summary>
+        <div class="section-body">
+          <div class="field"><label for="font">Typeface</label><select id="font"><option value="GC Sans">GC Sans</option><option value="Avenir Next">Avenir Next</option><option value="Helvetica Neue">Helvetica Neue</option><option value="Georgia">Georgia</option><option value="Courier New">Courier New</option></select></div>
+          <div class="field"><div class="range-head"><label for="titleSize">Title size</label><output id="titleSizeOut"></output></div><input id="titleSize" type="range" min="90" max="220" value="154"></div>
+          <div class="field"><div class="range-head"><label for="labelSize">App name size</label><output id="labelSizeOut"></output></div><input id="labelSize" type="range" min="34" max="84" value="55"></div>
+          <div class="field"><div class="range-head"><label for="valueSize">Value size</label><output id="valueSizeOut"></output></div><input id="valueSize" type="range" min="40" max="104" value="72"></div>
+          <div class="field"><div class="range-head"><label for="safeMargin">Safe margin</label><output id="safeMarginOut"></output></div><input id="safeMargin" type="range" min="100" max="420" value="220"></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Colour & background</summary>
+        <div class="section-body">
+          <div class="field"><label for="palette">Palette preset</label><select id="palette"><option value="gaming">Gaming Careers</option><option value="mono">Monochrome</option><option value="cool">Cool technical</option><option value="warm">Warm editorial</option><option value="custom">Custom</option></select></div>
+          <div class="field"><label for="backgroundMode">Background</label><select id="backgroundMode"><option value="dark">Dark</option><option value="light">Light</option><option value="transparent">Transparent / browser source</option><option value="green">Chroma green</option></select></div>
+          <div class="color-row"><span>Background</span><input id="bgColor" type="color" value="#0d0d10"></div>
+          <div class="color-row"><span>Text</span><input id="textColor" type="color" value="#ffffff"></div>
+          <div class="color-row"><span>Secondary text</span><input id="mutedColor" type="color" value="#9aa4b5"></div>
+          <div class="color-row"><span>Primary result</span><input id="accentColor" type="color" value="#df3438"></div>
+          <div class="color-row"><span>Winning result</span><input id="winnerColor" type="color" value="#74dda1"></div>
+          <div class="color-row"><span>Track</span><input id="trackColor" type="color" value="#24242b"></div>
+        </div>
+      </details>
+
+      <details>
+        <summary>Animation</summary>
+        <div class="section-body">
+          <div class="two">
+            <div class="field"><label for="animation">Entrance</label><select id="animation"><option value="grow">Grow bars</option><option value="wipe">Wipe reveal</option><option value="slide">Slide in</option><option value="pop">Soft pop</option><option value="none">Instant</option></select></div>
+            <div class="field"><label for="easing">Motion feel</label><select id="easing"><option value="cubic-bezier(.16,1,.3,1)">Smooth</option><option value="cubic-bezier(.2,1.35,.35,1)">Springy</option><option value="cubic-bezier(.65,0,.35,1)">Cinematic</option><option value="linear">Linear</option></select></div>
+          </div>
+          <div class="field"><div class="range-head"><label for="duration">Duration</label><output id="durationOut"></output></div><input id="duration" type="range" min="300" max="3000" step="50" value="1050"></div>
+          <div class="field"><div class="range-head"><label for="stagger">Row stagger</label><output id="staggerOut"></output></div><input id="stagger" type="range" min="0" max="650" step="25" value="150"></div>
+          <label class="check"><input id="countUp" type="checkbox" checked> Count values up during reveal</label>
+        </div>
+      </details>
+
+      <details>
+        <summary>Project</summary>
+        <div class="section-body">
+          <div class="btns"><button class="btn" id="exportProject">Export setup</button><label class="file-label">Import setup<input id="projectFile" type="file" accept="application/json,.json"></label></div>
+          <div class="btns"><button class="btn wide" id="resetProject">Reset to sample</button></div>
+          <p class="help">Settings save automatically in this browser. Export a setup before making major variations.</p>
+        </div>
+      </details>
+
+      <div class="sticky-actions">
+        <div class="btns"><button class="btn primary" id="play">Play</button><button class="btn" id="resetAnim">Reset</button></div>
+        <div class="btns"><button class="btn wide" id="capture">Enter clean 4K capture</button></div>
+        <div class="status">3840×2160 · 23.976 fps · Space play · R reset · C capture</div>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar"><div class="readout"><strong>Benchmark Studio</strong><span class="chip">4K UHD</span><span class="chip">23.976</span><span class="chip" id="metricReadout">FPS impact</span></div><div class="timecode" id="timecode">00:00:00:00</div></header>
+      <div class="preview-wrap"><div class="viewport" id="viewport"><section class="stage anim-grow" id="stage">
+        <img class="capture-brand" src="{{BRAND}}" alt="">
+        <header class="head"><div class="kicker" id="stageKicker"></div><h1 id="stageTitle"></h1><p class="subtitle" id="stageSubtitle"></p></header>
+        <div class="chart bar-layout" id="chart"></div>
+        <div class="footnote" id="stageFootnote"></div>
+      </section></div></div>
+    </main>
+  </div>
+  <button class="capture-exit" id="captureExit">Exit capture · Esc</button>
+  <script>
+    const ASSETS={obs:"{{OBS}}",streamlabs:"{{STREAMLABS}}",prism:"{{PRISM}}",meld:"{{MELD}}",vmix:"{{VMIX}}",xsplit:"{{XSPLIT}}",ecamm:"{{ECAMM}}"};
+    const SAMPLE={generated:"2026-04-13T14:11:05.703505",system:{os:"Windows 11",cpu:"13th Gen Intel Core i7-13700KF",ram:"32",gpu:"NVIDIA GeForce RTX 4080"},config:{benchmark:"Unigine Superposition",preset:"1080p High"},baseline:{app_name:"Baseline",benchmark_score:33120,avg_fps:257.471,cpu_avg:10.11,ram_avg_gb:12.356},results:[{app_name:"OBS Studio",benchmark_score:30357,avg_fps:235.184,fps_1_pct_low:31.001,fps_01_pct_low:4.283,cpu_avg:12.877,ram_avg_gb:13.279},{app_name:"Meld Studio",benchmark_score:29633,avg_fps:229.273,fps_1_pct_low:27.21,fps_01_pct_low:3.736,cpu_avg:14.798,ram_avg_gb:14.199},{app_name:"Streamlabs Desktop",benchmark_score:29690,avg_fps:227.95,fps_1_pct_low:30.823,fps_01_pct_low:4.266,cpu_avg:15.193,ram_avg_gb:13.941},{app_name:"PRISM Live Studio",benchmark_score:29004,avg_fps:224.546,fps_1_pct_low:26.514,fps_01_pct_low:3.493,cpu_avg:44.925,ram_avg_gb:15.432}]};
+    const METRICS={fpsLoss:{label:"FPS impact vs baseline",key:"avg_fps",unit:"%",precision:1,direction:"low",derive:true},avg_fps:{label:"Average FPS",key:"avg_fps",unit:" FPS",precision:1,direction:"high"},benchmark_score:{label:"Benchmark score",key:"benchmark_score",unit:" pts",precision:0,direction:"high"},fps_1_pct_low:{label:"1% low FPS",key:"fps_1_pct_low",unit:" FPS",precision:1,direction:"high"},fps_01_pct_low:{label:"0.1% low FPS",key:"fps_01_pct_low",unit:" FPS",precision:1,direction:"high"},cpu_avg:{label:"Total CPU use",key:"cpu_avg",unit:"%",precision:1,direction:"low"},app_cpu_avg:{label:"Application CPU use",key:"app_cpu_avg",unit:"%",precision:1,direction:"low"},ram_avg_gb:{label:"System RAM use",key:"ram_avg_gb",unit:" GB",precision:2,direction:"low"},app_ram_avg_mb:{label:"Application RAM use",key:"app_ram_avg_mb",unit:" MB",precision:0,direction:"low"},gpu_vram_avg_mb:{label:"VRAM use",key:"gpu_vram_avg_mb",unit:" MB",precision:0,direction:"low"}};
+    const DEFAULT_SETTINGS={title:"How much performance does streaming cost?",subtitle:"Unigine Superposition · 1080p High · NVIDIA GeForce RTX 4080",kicker:"Performance test",footnote:"Initial test data · replace after final controlled benchmark runs",metric:"fpsLoss",direction:"low",sort:"best",unit:"%",precision:1,rowLimit:6,chartType:"bar",scaleMode:"data",manualMax:100,showRank:true,showLogo:true,showBrand:true,showBaseline:false,highlightWinner:true,uppercaseTitle:false,font:"GC Sans",titleSize:154,labelSize:55,valueSize:72,safeMargin:220,palette:"gaming",backgroundMode:"dark",bgColor:"#0d0d10",textColor:"#ffffff",mutedColor:"#9aa4b5",accentColor:"#df3438",winnerColor:"#74dda1",trackColor:"#24242b",animation:"grow",easing:"cubic-bezier(.16,1,.3,1)",duration:1050,stagger:150,countUp:true};
+    const PALETTES={gaming:{bgColor:"#0d0d10",textColor:"#ffffff",mutedColor:"#9aa4b5",accentColor:"#df3438",winnerColor:"#74dda1",trackColor:"#24242b"},mono:{bgColor:"#0b0b0c",textColor:"#ffffff",mutedColor:"#9a9a9f",accentColor:"#d4d4d8",winnerColor:"#ffffff",trackColor:"#29292d"},cool:{bgColor:"#071019",textColor:"#f4f8ff",mutedColor:"#91a4bb",accentColor:"#4e9dff",winnerColor:"#67e1c0",trackColor:"#172534"},warm:{bgColor:"#17100c",textColor:"#fff8ee",mutedColor:"#bea995",accentColor:"#ef7d45",winnerColor:"#f1ce68",trackColor:"#33231b"}};
+    let data=structuredClone(SAMPLE);let settings={...DEFAULT_SETTINGS};let metricValues=[];let dragIndex=null;let ticker=0;let startTime=0;
+    const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];const stage=$("#stage"),viewport=$("#viewport");
+    function esc(v){return String(v??"").replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"})[c])}
+    function asset(name){const n=name.toLowerCase();if(n.includes("streamlabs"))return ASSETS.streamlabs;if(n.includes("prism"))return ASSETS.prism;if(n.includes("meld"))return ASSETS.meld;if(n.includes("vmix"))return ASSETS.vmix;if(n.includes("xsplit"))return ASSETS.xsplit;if(n.includes("ecamm"))return ASSETS.ecamm;return ASSETS.obs}
+    function fit(){const r=viewport.getBoundingClientRect();stage.style.transform=`scale(${Math.min(r.width/3840,r.height/2160)})`}
+    function extract(){const metric=METRICS[settings.metric];const baseline=Number(data.baseline?.[metric.key]??0);return (data.results||[]).map((item,index)=>{let value=Number(item[metric.key]);if(metric.derive)value=baseline?((baseline-value)/baseline)*100:0;return{name:item.app_name||`Result ${index+1}`,value:Number.isFinite(value)?value:0,raw:item,index}})}
+    function syncMetricValues(){metricValues=extract()}
+    function ordered(){let rows=metricValues.map((x,i)=>({...x,manual:i}));if(settings.sort!=="manual"){const best=settings.direction==="high"?-1:1;rows.sort((a,b)=>(a.value-b.value)*(settings.sort==="best"?best:-best))}return rows.slice(0,settings.rowLimit)}
+    function format(v){return`${Number(v).toFixed(settings.precision)}${settings.unit}`}
+    function renderEditor(){syncMetricValues();$("#dataEditor").innerHTML=metricValues.map((row,i)=>`<div class="data-row" draggable="true" data-index="${i}"><span class="drag">⋮⋮</span><input type="text" data-role="name" value="${esc(row.name)}"><input type="number" step="any" data-role="value" value="${row.value}"><button class="remove" data-remove="${i}" aria-label="Remove">×</button></div>`).join("");bindEditor()}
+    function bindEditor(){ $$(".data-row").forEach(row=>{row.addEventListener("dragstart",()=>dragIndex=Number(row.dataset.index));row.addEventListener("dragover",e=>e.preventDefault());row.addEventListener("drop",e=>{e.preventDefault();const to=Number(row.dataset.index);const moved=data.results.splice(dragIndex,1)[0];data.results.splice(to,0,moved);settings.sort="manual";$("#sort").value="manual";renderAll()});row.querySelector('[data-role="name"]').addEventListener("input",e=>{data.results[row.dataset.index].app_name=e.target.value;renderChart()});row.querySelector('[data-role="value"]').addEventListener("input",e=>{const metric=METRICS[settings.metric],value=Number(e.target.value);if(metric.derive){const base=Number(data.baseline?.avg_fps||0);data.results[row.dataset.index].avg_fps=base*(1-value/100)}else data.results[row.dataset.index][metric.key]=value;renderChart()})});$$('[data-remove]').forEach(btn=>btn.addEventListener("click",()=>{data.results.splice(Number(btn.dataset.remove),1);renderAll()}))}
+    function renderChart(){resetAnim(false);const rows=ordered();const values=rows.map(r=>r.value);let min=Math.min(...values,0),max=Math.max(...values,1);if(settings.scaleMode==="data"){const pad=(max-min)*.08;min=Math.max(0,min-pad);max+=pad||1}else if(settings.scaleMode==="zero")min=0;else{min=0;max=Math.max(Number(settings.manualMax)||1,1)}const pct=v=>Math.max(4,Math.min(100,(v-min)/(max-min||1)*100));const winner=rows.reduce((best,row)=>!best||((settings.direction==="high"?row.value>best.value:row.value<best.value))?row:best,null);stage.className=`stage anim-${settings.animation}${settings.backgroundMode==="transparent"?" transparent":""}${settings.backgroundMode==="green"?" green":""}${settings.backgroundMode==="light"?" light":""}${settings.showRank?"":" hide-rank"}${settings.showLogo?"":" hide-logo"}${settings.showBrand?"":" hide-brand"}${settings.showBaseline?" show-baseline":""}`;stage.style.cssText+=`;--bg:${settings.bgColor};--fg:${settings.textColor};--muted:${settings.mutedColor};--accent:${settings.accentColor};--winner:${settings.winnerColor};--track:${settings.trackColor};--title-size:${settings.titleSize}px;--label-size:${settings.labelSize}px;--value-size:${settings.valueSize}px;--safe:${settings.safeMargin}px;--font:"${settings.font}";--title-transform:${settings.uppercaseTitle?"uppercase":"none"};--duration:${settings.duration}ms;--ease:${settings.easing}`;$("#stageTitle").textContent=settings.title;$("#stageSubtitle").textContent=settings.subtitle;$("#stageKicker").textContent=settings.kicker;$("#stageFootnote").textContent=settings.footnote;$("#metricReadout").textContent=METRICS[settings.metric].label;
+      if(settings.chartType==="cards"){$("#chart").className="chart card-layout";$("#chart").style.setProperty("--columns",Math.min(rows.length,4));$("#chart").innerHTML=rows.map((r,i)=>`<article class="result-card ${settings.highlightWinner&&r===winner?"winner":""}" style="--delay:${i*settings.stagger}ms"><div class="card-top"><span class="card-rank">${settings.showRank?`#${i+1}`:""}</span>${settings.showLogo?`<img class="card-logo" src="${asset(r.name)}" alt="">`:""}</div><div class="card-name">${esc(r.name)}</div><div class="card-value" data-target="${r.value}">${format(r.value)}<small>${esc(METRICS[settings.metric].label)}</small></div></article>`).join("")}else{$("#chart").className=`chart ${settings.chartType}-layout`;$("#chart").innerHTML=rows.map((r,i)=>`<div class="chart-row ${settings.highlightWinner&&r===winner?"winner":""}" style="--delay:${i*settings.stagger}ms"><div class="identity"><span class="rank">${i+1}</span><img class="logo" src="${asset(r.name)}" alt=""><span class="name">${esc(r.name)}</span></div><div class="mark-wrap"><div class="bar-track"><div class="bar-fill" style="--target:${pct(r.value)}%"></div></div><div class="baseline-marker" style="left:${pct(Number($("#baseline").value)||0)}%"></div></div><div class="value" data-target="${r.value}">${format(r.value)}<small>${esc(METRICS[settings.metric].label)}</small></div></div>`).join("")}}
+    const renderChartBase=renderChart;renderChart=function(){syncMetricValues();return renderChartBase()};
+    function renderAll(){settings=readSettings();renderEditor();renderChart();save()}
+    function readSettings(){const s={...settings};Object.keys(DEFAULT_SETTINGS).forEach(key=>{const el=$("#"+key);if(!el)return;if(el.type==="checkbox")s[key]=el.checked;else if(el.type==="number"||el.type==="range")s[key]=Number(el.value);else s[key]=el.value});return s}
+    function growCopyFields(){$$("textarea.copy-field").forEach(el=>{el.style.height="auto";el.style.height=`${Math.max(58,el.scrollHeight)}px`})}
+    function applySettings(){Object.keys(DEFAULT_SETTINGS).forEach(key=>{const el=$("#"+key);if(!el)return;if(el.type==="checkbox")el.checked=!!settings[key];else el.value=settings[key]});updateOutputs();requestAnimationFrame(growCopyFields)}
+    function updateOutputs(){["titleSize","labelSize","valueSize","safeMargin"].forEach(k=>$("#"+k+"Out").textContent=$("#"+k).value+" px");$("#durationOut").textContent=($("#duration").value/1000).toFixed(2)+" s";$("#staggerOut").textContent=$("#stagger").value+" ms"}
+    function metricChanged(){const m=METRICS[$("#metric").value];settings.metric=$("#metric").value;$("#direction").value=m.direction;$("#unit").value=m.unit;$("#precision").value=m.precision;const base=Number(data.baseline?.[m.key]??0);$("#baseline").value=m.derive?0:base;renderAll()}
+    function play(){resetAnim(false);void stage.offsetWidth;stage.classList.add("playing");startTime=performance.now();tick();if(settings.countUp)animateValues()}
+    function animateValues(){const els=$$("[data-target]");els.forEach((el,i)=>{const target=Number(el.dataset.target),start=performance.now()+i*settings.stagger,duration=settings.duration;const small=el.querySelector("small")?.outerHTML||"";const run=now=>{const p=Math.max(0,Math.min(1,(now-start)/duration));const eased=1-Math.pow(1-p,3);el.innerHTML=format(target*eased)+small;if(p<1)requestAnimationFrame(run)};requestAnimationFrame(run)})}
+    function resetAnim(clear=true){cancelAnimationFrame(ticker);stage.classList.remove("playing");if(clear)$("#timecode").textContent="00:00:00:00";$$('[data-target]').forEach(el=>{const small=el.querySelector("small")?.outerHTML||"";el.innerHTML=format(Number(el.dataset.target))+small})}
+    function tick(now=performance.now()){const frames=Math.floor((now-startTime)/1000*23.976),ff=frames%24,ss=Math.floor(frames/23.976)%60,mm=Math.floor(frames/23.976/60)%60,hh=Math.floor(frames/23.976/3600);$("#timecode").textContent=[hh,mm,ss,ff].map(v=>String(v).padStart(2,"0")).join(":");ticker=requestAnimationFrame(tick)}
+    function capture(on){document.body.classList.toggle("capture-mode",on);requestAnimationFrame(fit)}
+    function save(){localStorage.setItem("gc-benchmark-studio",JSON.stringify({settings,data}))}
+    function download(name,obj){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(obj,null,2)],{type:"application/json"}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+    function loadFile(file,callback){const reader=new FileReader();reader.onload=()=>{try{callback(JSON.parse(reader.result))}catch(e){alert("Could not read this JSON file: "+e.message)}};reader.readAsText(file)}
+    $("#metric").innerHTML=Object.entries(METRICS).map(([k,v])=>`<option value="${k}">${v.label}</option>`).join("");
+    try{const saved=JSON.parse(localStorage.getItem("gc-benchmark-studio"));if(saved?.settings&&saved?.data){settings={...DEFAULT_SETTINGS,...saved.settings};data=saved.data}}catch{}
+    applySettings();$("#rawJson").value=JSON.stringify(data,null,2);$("#baseline").value=0;
+    $("#metric").addEventListener("change",metricChanged);$$('input,select,textarea').forEach(el=>{if(["metric","jsonFile","projectFile","rawJson"].includes(el.id))return;el.addEventListener(el.tagName==="SELECT"||el.type==="checkbox"?"change":"input",()=>{if(el.id==="palette"&&el.value!=="custom"){const chosen=el.value;Object.assign(settings,PALETTES[chosen],{palette:chosen});applySettings()}else if(el.type==="color"){settings.palette="custom";$("#palette").value="custom"}updateOutputs();growCopyFields();renderAll()})});
+    $("#addRow").addEventListener("click",()=>{data.results.push({app_name:"New result",[METRICS[settings.metric].key]:0});renderAll()});$("#applyJson").addEventListener("click",()=>{try{const parsed=JSON.parse($("#rawJson").value);if(!parsed.baseline||!Array.isArray(parsed.results))throw Error("Expected baseline and results");data=parsed;renderAll()}catch(e){alert("Could not apply data: "+e.message)}});$("#jsonFile").addEventListener("change",e=>e.target.files[0]&&loadFile(e.target.files[0],parsed=>{data=parsed;$("#rawJson").value=JSON.stringify(data,null,2);renderAll()}));
+    $("#play").addEventListener("click",play);$("#resetAnim").addEventListener("click",()=>resetAnim());$("#capture").addEventListener("click",()=>capture(true));$("#captureExit").addEventListener("click",()=>capture(false));$("#exportProject").addEventListener("click",()=>download("benchmark-studio-project.json",{settings,data}));$("#projectFile").addEventListener("change",e=>e.target.files[0]&&loadFile(e.target.files[0],project=>{settings={...DEFAULT_SETTINGS,...project.settings};data=project.data;applySettings();$("#rawJson").value=JSON.stringify(data,null,2);renderAll()}));$("#resetProject").addEventListener("click",()=>{settings={...DEFAULT_SETTINGS};data=structuredClone(SAMPLE);applySettings();$("#rawJson").value=JSON.stringify(data,null,2);renderAll()});
+    window.addEventListener("resize",fit);document.addEventListener("keydown",e=>{if(["INPUT","TEXTAREA","SELECT"].includes(document.activeElement?.tagName))return;if(e.code==="Space"){e.preventDefault();play()}if(e.key.toLowerCase()==="r")resetAnim();if(e.key.toLowerCase()==="c")capture(true);if(e.key==="Escape")capture(false)});
+    renderAll();fit();
+  </script>
+</body>
+</html>

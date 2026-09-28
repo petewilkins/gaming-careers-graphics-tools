@@ -1,0 +1,854 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Streaming Software Tier List</title>
+  <style>
+    @font-face {
+      font-family: "GC Sans";
+      src: url("{{FONT}}") format("truetype");
+      font-display: swap;
+      font-weight: 300 700;
+    }
+
+    :root {
+      color-scheme: dark;
+      --bg: #0d0d10;
+      --surface: #16161a;
+      --card: #1c1c21;
+      --card-raised: #24242a;
+      --border: #303037;
+      --text: #ffffff;
+      --muted: #94a3b8;
+      --brand: #dc3236;
+      --s: #ff7f7f;
+      --a: #ffbf7f;
+      --b: #ffdf7f;
+      --c: #ffff7f;
+      --d: #bfff7f;
+      --label-text: #1c1c21;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { min-height: 100%; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(75rem 42rem at 86% -8%, rgba(220, 50, 54, .10), transparent 58%),
+        var(--bg);
+      color: var(--text);
+      font-family: "GC Sans", "Avenir Next", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    button { font: inherit; }
+
+    .app {
+      width: min(100%, 1560px);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: clamp(18px, 2.4vw, 42px);
+      display: grid;
+      align-content: start;
+      gap: clamp(16px, 2vw, 30px);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand-wordmark {
+      width: clamp(210px, 17vw, 265px);
+      height: auto;
+      margin: 0 0 10px;
+      display: block;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 3.2vw, 54px);
+      line-height: .96;
+      letter-spacing: -.045em;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .reset {
+      appearance: none;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 10px 15px;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+    }
+
+    .reset:hover { border-color: var(--brand); background: var(--card); }
+    .reset:active { transform: translateY(1px); }
+    .reset:focus-visible { outline: 3px solid rgba(220, 50, 54, .45); outline-offset: 3px; }
+
+    .board {
+      display: grid;
+      gap: 9px;
+    }
+
+    .tier-row {
+      --tier: var(--s);
+      min-height: clamp(96px, 10.4vh, 126px);
+      display: grid;
+      grid-template-columns: auto 1fr;
+      column-gap: 6px;
+      padding: 6px;
+      overflow: hidden;
+      border: 1px solid color-mix(in srgb, var(--tier) 18%, var(--border));
+      border-radius: 14px;
+      background: color-mix(in srgb, var(--tier) 13%, var(--card));
+      transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease, opacity 360ms ease, filter 360ms ease;
+    }
+
+    .tier-row[data-tier="A"] { --tier: var(--a); }
+    .tier-row[data-tier="B"] { --tier: var(--b); }
+    .tier-row[data-tier="C"] { --tier: var(--c); }
+    .tier-row[data-tier="D"] { --tier: var(--d); }
+
+    .tier-row.is-target,
+    .tray.is-target {
+      border-color: var(--tier, var(--brand));
+      background: color-mix(in srgb, var(--tier, var(--brand)) 22%, var(--card));
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--tier, var(--brand)) 22%, transparent);
+    }
+
+    .tier-label {
+      width: auto;
+      height: 100%;
+      aspect-ratio: 1;
+      align-self: center;
+      justify-self: center;
+      display: grid;
+      place-items: center;
+      margin: 0;
+      border-radius: 11px;
+      background: var(--tier);
+      color: var(--label-text);
+      font-size: clamp(28px, 3vw, 42px);
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .drop-zone {
+      min-width: 0;
+      min-height: 100%;
+    }
+
+    .cards {
+      min-height: 100%;
+      padding: 12px 14px 12px 0;
+      display: flex;
+      align-items: center;
+      align-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tier-row .cards {
+      height: 100%;
+      padding-block: 6px;
+    }
+
+    .tier-row .drop-zone {
+      height: 100%;
+    }
+
+    .tray {
+      --tier: var(--brand);
+      min-height: 0;
+      align-self: start;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--surface);
+      transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease, opacity 360ms ease, filter 360ms ease;
+    }
+
+    .tray-head {
+      padding: 12px 18px 0;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .tray-title {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    .tray .cards {
+      padding: 10px 18px 14px;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      align-items: stretch;
+    }
+
+    .tray.is-empty .tray-head {
+      display: none;
+    }
+
+    .tray.is-empty .cards {
+      min-height: 52px;
+      padding: 8px 18px;
+    }
+
+    .software-card {
+      position: relative;
+      min-width: 0;
+      min-height: 82px;
+      padding: 10px;
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      background: var(--card);
+      color: var(--text);
+      box-shadow: 0 5px 18px rgba(0, 0, 0, .14);
+      cursor: grab;
+      user-select: none;
+      touch-action: none;
+      transition: border-color 150ms ease, background 150ms ease, transform 150ms ease, box-shadow 150ms ease, opacity 360ms ease, filter 360ms ease;
+    }
+
+    .software-card:hover {
+      border-color: #494951;
+      background: var(--card-raised);
+      transform: translateY(-2px);
+      box-shadow: 0 9px 24px rgba(0, 0, 0, .22);
+    }
+
+    .software-card:focus-visible {
+      outline: 3px solid rgba(220, 50, 54, .55);
+      outline-offset: 3px;
+    }
+
+    .software-card.dragging {
+      margin: 0;
+      pointer-events: none;
+      cursor: grabbing;
+      transform: rotate(-1.5deg) scale(1.035);
+      border-color: var(--brand);
+      background: var(--card-raised);
+      box-shadow: 0 22px 56px rgba(0, 0, 0, .45);
+      transition: none;
+    }
+
+    .logo-frame {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 10px;
+      flex: none;
+    }
+
+    .logo-frame img {
+      width: 44px;
+      height: 44px;
+      display: block;
+      object-fit: contain;
+      pointer-events: none;
+    }
+
+    .software-name {
+      min-width: 0;
+      font-size: clamp(13px, .85vw, 15px);
+      font-weight: 600;
+      line-height: 1.08;
+      overflow-wrap: normal;
+      word-break: normal;
+    }
+
+    .tier-row .software-card {
+      width: clamp(200px, 13vw, 240px);
+      height: 100%;
+      min-height: 0;
+      padding: clamp(10px, 1vh, 12px);
+      grid-template-columns: clamp(54px, 5vh, 64px) minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .tier-row .logo-frame {
+      width: clamp(54px, 5vh, 64px);
+      height: clamp(54px, 5vh, 64px);
+      border-radius: 13px;
+    }
+
+    .tier-row .logo-frame img {
+      width: calc(100% - 2px);
+      height: calc(100% - 2px);
+    }
+
+    .tier-row .software-name {
+      font-size: clamp(17px, 1.05vw, 20px);
+      line-height: 1.08;
+    }
+
+    .drag-placeholder {
+      min-width: 0;
+      min-height: 82px;
+      border: 1px dashed color-mix(in srgb, var(--tier, var(--brand)) 64%, transparent);
+      border-radius: 13px;
+      background: color-mix(in srgb, var(--tier, var(--brand)) 7%, transparent);
+    }
+
+    .tier-row .drag-placeholder {
+      width: clamp(200px, 13vw, 240px);
+      height: 100%;
+      min-height: 0;
+    }
+
+    .app.is-crowning .topbar,
+    .app.is-crowning .tray,
+    .app.is-crowning .tier-row:not(.has-champion) {
+      opacity: .3;
+      filter: saturate(.45);
+    }
+
+    .app.is-crowning .has-champion .software-card:not(.is-champion) {
+      opacity: .28;
+      filter: saturate(.4);
+    }
+
+    .tier-row.has-champion {
+      position: relative;
+      z-index: 20;
+      overflow: visible;
+      border-color: color-mix(in srgb, #f3c452 58%, var(--border));
+      box-shadow: 0 0 0 1px rgba(243, 196, 82, .16), 0 20px 64px rgba(0, 0, 0, .2);
+    }
+
+    .software-card.is-champion {
+      z-index: 30;
+      border-color: #f3c452;
+      background: linear-gradient(145deg, #29261f, #1d1d21 58%);
+      box-shadow: 0 0 0 2px rgba(243, 196, 82, .16), 0 16px 46px rgba(0, 0, 0, .48), 0 0 42px rgba(243, 196, 82, .22);
+      animation: champion-lift 900ms cubic-bezier(.16, 1, .3, 1) forwards;
+    }
+
+    .champion-crown {
+      position: absolute;
+      left: 50%;
+      top: -51px;
+      width: 62px;
+      height: 44px;
+      z-index: 4;
+      pointer-events: none;
+      filter: drop-shadow(0 8px 13px rgba(0, 0, 0, .48));
+      opacity: 0;
+      animation: crown-drop 860ms 260ms cubic-bezier(.16, 1, .3, 1) forwards;
+    }
+
+    .champion-crown svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+    }
+
+    .champion-spark {
+      --dx: 0px;
+      --dy: -50px;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 5px;
+      height: 5px;
+      z-index: 3;
+      border-radius: 50%;
+      background: #f7d778;
+      box-shadow: 0 0 10px rgba(247, 215, 120, .8);
+      pointer-events: none;
+      opacity: 0;
+      animation: champion-spark 780ms var(--delay, 160ms) ease-out forwards;
+    }
+
+    .champion-confetti {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 7px;
+      height: 15px;
+      border-radius: 2px;
+      background: var(--confetti-color, #f3c452);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .22);
+      opacity: 0;
+      animation: confetti-flight 1150ms var(--confetti-delay, 420ms) cubic-bezier(.16, .8, .3, 1) forwards;
+    }
+
+    .confetti-piece.is-round {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    @keyframes champion-lift {
+      0% { transform: translateY(0) scale(1); }
+      58% { transform: translateY(-9px) scale(1.16); }
+      100% { transform: translateY(-6px) scale(1.11); }
+    }
+
+    @keyframes crown-drop {
+      0% { opacity: 0; transform: translate(-50%, -32px) scale(.68) rotate(-5deg); }
+      62% { opacity: 1; transform: translate(-50%, 5px) scale(1.08) rotate(2deg); }
+      100% { opacity: 1; transform: translate(-50%, 0) scale(1) rotate(0); }
+    }
+
+    @keyframes champion-spark {
+      0% { opacity: 0; transform: translate(-50%, -50%) scale(.35); }
+      22% { opacity: 1; }
+      100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); }
+    }
+
+    @keyframes confetti-flight {
+      0% { opacity: 0; transform: translate3d(0, 0, 0) rotate(0) scale(.7); }
+      16% { opacity: 1; }
+      58% { opacity: 1; transform: translate3d(var(--mid-x), var(--mid-y), 0) rotate(var(--mid-rotation)) scale(1); }
+      100% { opacity: 0; transform: translate3d(var(--end-x), var(--end-y), 0) rotate(var(--end-rotation)) scale(.9); }
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 1400px) {
+      .tray .cards { grid-template-columns: repeat(5, minmax(150px, 1fr)); }
+    }
+
+    @media (max-width: 780px) {
+      .app { padding: 14px; }
+      .topbar { align-items: flex-start; }
+      .tier-label { margin: 0; }
+      .tray .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .software-card { grid-template-columns: 42px minmax(0, 1fr); padding: 9px; }
+      .logo-frame, .logo-frame img { width: 40px; height: 40px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <img class="brand-wordmark" src="{{BRAND}}" alt="Gaming Careers">
+        <h1>Streaming software tier list</h1>
+      </div>
+      <div class="actions">
+        <button class="reset" id="reset" type="button">Reset board</button>
+      </div>
+    </header>
+
+    <section class="board" aria-label="Tier list">
+      <div class="tier-row" data-tier="S"><div class="tier-label">S</div><div class="drop-zone" data-zone="S"><div class="cards"></div></div></div>
+      <div class="tier-row" data-tier="A"><div class="tier-label">A</div><div class="drop-zone" data-zone="A"><div class="cards"></div></div></div>
+      <div class="tier-row" data-tier="B"><div class="tier-label">B</div><div class="drop-zone" data-zone="B"><div class="cards"></div></div></div>
+      <div class="tier-row" data-tier="C"><div class="tier-label">C</div><div class="drop-zone" data-zone="C"><div class="cards"></div></div></div>
+      <div class="tier-row" data-tier="D"><div class="tier-label">D</div><div class="drop-zone" data-zone="D"><div class="cards"></div></div></div>
+    </section>
+
+    <section class="tray drop-zone" data-zone="unplaced" aria-labelledby="tray-title">
+      <div class="tray-head">
+        <h2 class="tray-title" id="tray-title">Yet to be placed</h2>
+      </div>
+      <div class="cards"></div>
+    </section>
+
+    <p class="sr-only" id="live" aria-live="polite"></p>
+  </main>
+
+  <template id="cardTemplate">
+    <button class="software-card" type="button">
+      <span class="logo-frame"><img alt=""></span>
+      <span class="software-name"></span>
+    </button>
+  </template>
+
+  <script>
+    const SOFTWARE = [
+      { id: "streamlabs", name: "Streamlabs Desktop", logo: "{{STREAMLABS}}" },
+      { id: "prism", name: "PRISM Live Studio", logo: "{{PRISM}}" },
+      { id: "vmix", name: "vMix", logo: "{{VMIX}}" },
+      { id: "streamyard", name: "StreamYard", logo: "{{STREAMYARD}}" },
+      { id: "riverside", name: "Riverside", logo: "{{RIVERSIDE}}" },
+      { id: "restream", name: "Restream", logo: "{{RESTREAM}}" },
+      { id: "xsplit", name: "XSplit", logo: "{{XSPLIT}}" },
+      { id: "ecamm", name: "Ecamm Live", logo: "{{ECAMM}}" },
+      { id: "meld", name: "Meld Studio", logo: "{{MELD}}" },
+      { id: "obs", name: "OBS Studio", logo: "{{OBS}}" }
+    ];
+
+    const STORAGE_KEY = "gaming-careers-streaming-tier-list-v1";
+    const ZONE_ORDER = ["unplaced", "S", "A", "B", "C", "D"];
+    const template = document.getElementById("cardTemplate");
+    const live = document.getElementById("live");
+    const app = document.querySelector(".app");
+    let drag = null;
+    let crownTimer = null;
+    let confettiTimer = null;
+
+    function zone(name) {
+      return document.querySelector(`[data-zone="${name}"] .cards`) || document.querySelector(`[data-zone="${name}"]`);
+    }
+
+    function createCard(item) {
+      const card = template.content.firstElementChild.cloneNode(true);
+      card.dataset.id = item.id;
+      card.setAttribute("aria-label", `${item.name}. Drag to rank, or press Enter to move to the next tier.`);
+      card.querySelector("img").src = item.logo;
+      card.querySelector("img").alt = "";
+      card.querySelector(".software-name").textContent = item.name;
+      card.addEventListener("pointerdown", beginPointer);
+      card.addEventListener("keydown", handleKeyboard);
+      return card;
+    }
+
+    function savedLayout() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        return parsed && typeof parsed === "object" ? parsed : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function render() {
+      clearChampion();
+      document.querySelectorAll(".drop-zone .cards").forEach(cards => cards.replaceChildren());
+      const layout = savedLayout();
+      SOFTWARE.forEach(item => {
+        const target = layout?.[item.id];
+        const targetZone = ZONE_ORDER.includes(target) ? target : "unplaced";
+        zone(targetZone).append(createCard(item));
+      });
+      updateTrayState(false);
+    }
+
+    function updateTrayState(allowCrowning = true) {
+      const tray = document.querySelector(".tray");
+      const isEmpty = !tray.querySelector(".software-card");
+      tray.classList.toggle("is-empty", isEmpty);
+      tray.setAttribute("aria-label", isEmpty ? "Empty software tray. Drop a card here." : "Yet to be placed");
+
+      if (!isEmpty) clearChampion();
+      else if (allowCrowning && !document.querySelector(".is-champion")) scheduleChampion();
+    }
+
+    function highestRankedCard() {
+      for (const tier of ["S", "A", "B", "C", "D"]) {
+        const card = zone(tier).querySelector(".software-card");
+        if (card) return card;
+      }
+      return null;
+    }
+
+    function scheduleChampion() {
+      window.clearTimeout(crownTimer);
+      crownTimer = window.setTimeout(crownChampion, 220);
+    }
+
+    function crownChampion() {
+      const card = highestRankedCard();
+      if (!card || document.querySelector(".tray .software-card")) return;
+
+      clearChampion();
+      const row = card.closest(".tier-row");
+      app.classList.add("is-crowning");
+      row.classList.add("has-champion");
+      card.classList.add("is-champion");
+
+      const crown = document.createElement("span");
+      crown.className = "champion-crown";
+      crown.setAttribute("aria-hidden", "true");
+      crown.innerHTML = `<svg viewBox="0 0 60 44" xmlns="http://www.w3.org/2000/svg"><path d="M6 12 19 23 30 5l11 18 13-11-4 25H10L6 12Z" fill="#f3c452" stroke="#ffe59a" stroke-width="2" stroke-linejoin="round"/><path d="M11 32h38v7H11z" rx="2" fill="#d99e28"/><circle cx="6" cy="11" r="3" fill="#ffe59a"/><circle cx="30" cy="5" r="3" fill="#ffe59a"/><circle cx="54" cy="11" r="3" fill="#ffe59a"/></svg>`;
+      card.append(crown);
+
+      const sparks = [[-74,-48],[-46,-75],[-14,-88],[18,-86],[50,-69],[76,-40],[-82,-10],[84,-5]];
+      sparks.forEach(([x, y], index) => {
+        const spark = document.createElement("span");
+        spark.className = "champion-spark";
+        spark.style.setProperty("--dx", `${x}px`);
+        spark.style.setProperty("--dy", `${y}px`);
+        spark.style.setProperty("--delay", `${120 + index * 34}ms`);
+        card.append(spark);
+      });
+
+      launchConfetti(card);
+
+      const name = card.querySelector(".software-name").textContent;
+      live.textContent = `${name} crowned champion.`;
+    }
+
+    function launchConfetti(card) {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+      const rect = card.getBoundingClientRect();
+      const originX = rect.left + rect.width / 2;
+      const originY = rect.top - 4;
+      const colors = ["#f3c452", "#ffe59a", "#e83e3e", "#f4f4f2"];
+      const layer = document.createElement("div");
+      layer.className = "champion-confetti";
+      layer.setAttribute("aria-hidden", "true");
+
+      for (let index = 0; index < 30; index += 1) {
+        const piece = document.createElement("span");
+        const spread = ((index * 73) % 101) / 100;
+        const endX = Math.round((spread - .5) * 540);
+        const lift = 78 + ((index * 29) % 86);
+        const endY = -(lift + 18 + ((index * 47) % 42));
+        const rotation = (index % 2 ? -1 : 1) * (300 + ((index * 53) % 520));
+        const delay = 390 + ((index * 37) % 230);
+
+        piece.className = `confetti-piece${index % 5 === 0 ? " is-round" : ""}`;
+        piece.style.left = `${originX + ((index * 17) % 25) - 12}px`;
+        piece.style.top = `${originY + ((index * 11) % 13) - 6}px`;
+        piece.style.setProperty("--confetti-color", colors[index % colors.length]);
+        piece.style.setProperty("--confetti-delay", `${delay}ms`);
+        piece.style.setProperty("--mid-x", `${Math.round(endX * .58)}px`);
+        piece.style.setProperty("--mid-y", `${-Math.round(lift * .82)}px`);
+        piece.style.setProperty("--end-x", `${endX}px`);
+        piece.style.setProperty("--end-y", `${endY}px`);
+        piece.style.setProperty("--mid-rotation", `${Math.round(rotation * .38)}deg`);
+        piece.style.setProperty("--end-rotation", `${rotation}deg`);
+        layer.append(piece);
+      }
+
+      document.body.append(layer);
+      window.clearTimeout(confettiTimer);
+      confettiTimer = window.setTimeout(() => layer.remove(), 1850);
+    }
+
+    function clearChampion() {
+      window.clearTimeout(crownTimer);
+      window.clearTimeout(confettiTimer);
+      crownTimer = null;
+      confettiTimer = null;
+      app.classList.remove("is-crowning");
+      document.querySelectorAll(".has-champion").forEach(row => row.classList.remove("has-champion"));
+      document.querySelectorAll(".is-champion").forEach(card => card.classList.remove("is-champion"));
+      document.querySelectorAll(".champion-crown, .champion-spark, .champion-confetti").forEach(item => item.remove());
+    }
+
+    function persist() {
+      const layout = {};
+      document.querySelectorAll(".software-card").forEach(card => {
+        layout[card.dataset.id] = card.closest(".drop-zone").dataset.zone;
+      });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
+      updateTrayState(true);
+    }
+
+    function beginPointer(event) {
+      if (event.button !== 0 || drag) return;
+      const card = event.currentTarget;
+      const rect = card.getBoundingClientRect();
+      drag = {
+        card,
+        pointerId: event.pointerId,
+        offsetX: event.clientX - rect.left,
+        offsetY: event.clientY - rect.top,
+        width: rect.width,
+        height: rect.height,
+        startX: event.clientX,
+        startY: event.clientY,
+        active: false,
+        placeholder: null,
+        target: card.closest(".drop-zone"),
+        originParent: card.parentElement,
+        originNextSibling: card.nextElementSibling
+      };
+      addDragListeners(card);
+      try { card.setPointerCapture(event.pointerId); } catch {}
+    }
+
+    function addDragListeners(card) {
+      window.addEventListener("pointermove", movePointer, true);
+      window.addEventListener("pointerup", endPointer, true);
+      window.addEventListener("pointercancel", cancelPointer, true);
+      window.addEventListener("blur", cancelActiveDrag);
+      window.addEventListener("keydown", handleDragEscape, true);
+      document.addEventListener("visibilitychange", handleVisibilityChange);
+      card.addEventListener("lostpointercapture", handleLostPointerCapture);
+    }
+
+    function removeDragListeners(card, pointerId) {
+      window.removeEventListener("pointermove", movePointer, true);
+      window.removeEventListener("pointerup", endPointer, true);
+      window.removeEventListener("pointercancel", cancelPointer, true);
+      window.removeEventListener("blur", cancelActiveDrag);
+      window.removeEventListener("keydown", handleDragEscape, true);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      card.removeEventListener("lostpointercapture", handleLostPointerCapture);
+      try {
+        if (card.hasPointerCapture(pointerId)) card.releasePointerCapture(pointerId);
+      } catch {}
+    }
+
+    function cancelActiveDrag() {
+      if (drag) finishDrag(true);
+    }
+
+    function handleDragEscape(event) {
+      if (event.key !== "Escape" || !drag) return;
+      event.preventDefault();
+      finishDrag(true);
+    }
+
+    function handleVisibilityChange() {
+      if (document.hidden) cancelActiveDrag();
+    }
+
+    function handleLostPointerCapture(event) {
+      if (!drag || event.pointerId !== drag.pointerId) return;
+      finishDrag(true);
+    }
+
+    function activateDrag(event) {
+      clearChampion();
+      const { card, width, height } = drag;
+      const placeholder = document.createElement("div");
+      placeholder.className = "drag-placeholder";
+      card.after(placeholder);
+      drag.placeholder = placeholder;
+      drag.active = true;
+      card.classList.add("dragging");
+      Object.assign(card.style, {
+        position: "fixed",
+        left: `${event.clientX - drag.offsetX}px`,
+        top: `${event.clientY - drag.offsetY}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+        zIndex: "1000"
+      });
+      document.body.style.cursor = "grabbing";
+    }
+
+    function movePointer(event) {
+      if (!drag || event.pointerId !== drag.pointerId) return;
+      if (!drag.active) {
+        const distance = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
+        if (distance < 5) return;
+        activateDrag(event);
+      }
+
+      drag.card.style.left = `${event.clientX - drag.offsetX}px`;
+      drag.card.style.top = `${event.clientY - drag.offsetY}px`;
+      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest(".drop-zone");
+      document.querySelectorAll(".drop-zone").forEach(item => item.classList.remove("is-target"));
+      if (!target) return;
+      drag.target = target;
+      target.classList.add("is-target");
+
+      const cards = target.querySelector(".cards") || target;
+      const candidates = [...cards.querySelectorAll(".software-card:not(.dragging)")];
+      const before = candidates.find(candidate => {
+        const rect = candidate.getBoundingClientRect();
+        return event.clientY < rect.bottom && event.clientX < rect.left + rect.width / 2;
+      });
+      if (before) cards.insertBefore(drag.placeholder, before);
+      else cards.append(drag.placeholder);
+    }
+
+    function finishDrag(cancelled = false) {
+      if (!drag) return;
+      const state = drag;
+      drag = null;
+      const { card, placeholder, active, pointerId, originParent, originNextSibling } = state;
+      removeDragListeners(card, pointerId);
+      document.querySelectorAll(".drop-zone").forEach(item => item.classList.remove("is-target"));
+      document.body.style.cursor = "";
+
+      if (active) {
+        if (cancelled) {
+          if (originNextSibling?.parentElement === originParent) originParent.insertBefore(card, originNextSibling);
+          else originParent.append(card);
+        } else if (placeholder?.parentElement) {
+          placeholder.parentElement.insertBefore(card, placeholder);
+        }
+        placeholder?.remove();
+        card.classList.remove("dragging");
+        card.removeAttribute("style");
+        if (!cancelled) {
+          persist();
+          const destinationName = card.closest(".drop-zone").dataset.zone;
+          live.textContent = `${card.querySelector(".software-name").textContent} moved to ${destinationName === "unplaced" ? "yet to be placed" : `${destinationName} tier`}.`;
+        } else {
+          updateTrayState(false);
+          live.textContent = "Drag cancelled.";
+        }
+      }
+    }
+
+    function endPointer(event) {
+      if (!drag || event.pointerId !== drag.pointerId) return;
+      finishDrag(false);
+    }
+
+    function cancelPointer(event) {
+      if (!drag || event.pointerId !== drag.pointerId) return;
+      finishDrag(true);
+    }
+
+    function handleKeyboard(event) {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      clearChampion();
+      const card = event.currentTarget;
+      const current = card.closest(".drop-zone").dataset.zone;
+      const next = ZONE_ORDER[(ZONE_ORDER.indexOf(current) + 1) % ZONE_ORDER.length];
+      zone(next).append(card);
+      persist();
+      live.textContent = `${card.querySelector(".software-name").textContent} moved to ${next === "unplaced" ? "yet to be placed" : `${next} tier`}.`;
+      card.focus();
+    }
+
+    document.getElementById("reset").addEventListener("click", () => {
+      localStorage.removeItem(STORAGE_KEY);
+      render();
+      live.textContent = "Tier list reset. All software returned to yet to be placed.";
+    });
+
+    render();
+  </script>
+</body>
+</html>
